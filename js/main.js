@@ -8,9 +8,10 @@ function Canvas( elem, options ) {
     me.options = $.extend( me.defaults, options );
 
     me.brush = me.options.brush;
-    me.down = false;
-    me.path = [];
-    me.pathLength = 0;
+    me.mouse = {
+        down: false,
+        x: [], y:[]
+    };
 
     me.addCanvas();
     me.addControls();
@@ -21,21 +22,25 @@ function Canvas( elem, options ) {
 Canvas.prototype = {
 
     defaults: {
-        width: 800,
-        height: 600,
+        width: 480,
+        height: 270,
         cpHeight: 64,
         brush: {
-            size: 6,
-            minSize: .1,
-            maxSize: 25,
-            opacity: .75,
-            minOpacity:.01,
-            maxOpacity: 1,
-            color: 'black'
+            size: 6, minSize: .051, maxSize: 25,
+            opacity: .75, minOpacity:.01, maxOpacity: 1,
+            color: '51,102,153'
         },
         controls: {
-            space: 10
+            space: 16
         }
+    },
+    onBrushChanged: function() {
+        var brush = this.brush;
+        [ this.ctx, this.fakeCtx ].forEach(function( ctx, i ) {
+            ctx.strokeStyle = ctx.fillStyle = 'rgba(' + brush.color + ', ' + brush.opacity + ')';
+            ctx.lineWidth = brush.size * 2;
+            ctx.save();
+        });
     },
 
     addCanvas: function() {
@@ -69,10 +74,8 @@ Canvas.prototype = {
         var $canvas = createCanvas( opts.width, opts.cpHeight),
             ctx = $canvas[0].getContext('2d');
 
-        ctx.font = '11px tahoma, arial, verdana, sans-serif, Lucida Sans;';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#E4E4E4';
-        ctx.strokeStyle = '#BFBFBF';
+        ctx.fillStyle   = 'rgb(225,225,225)';
+        ctx.strokeStyle = 'rgb(125,125,125)';
         ctx.lineWidth = 0.5;
         ctx.save();
 
@@ -80,18 +83,21 @@ Canvas.prototype = {
         me.$cpCtx = ctx;
 
         var space = opts.controls.space,
-            ctrlPosition = { x: space - .5, y: opts.cpHeight/2 - .5 };
+            ctrlPosition = { x: space, y: opts.cpHeight/2 };
 
+        ctrlPosition.x += addTitle( ctx, 'Цвет:', ctrlPosition ) + 10;
         var colorPicker = new ColorPicker( $canvas, ctx, ctrlPosition, {
             onChange: function( color ) {
                 me.brush.color = color;
                 me.onBrushChanged();
             }
         });
+        ctrlPosition.x += colorPicker.position.w + space*3;
         me.$paletteCanvas = colorPicker.$palette;
         me.$paletteCtx = colorPicker.$paletteCtx;
-        ctrlPosition.x += colorPicker.position.w + space;
 
+
+        ctrlPosition.x += addTitle( ctx, 'Толщина:', ctrlPosition ) + 10;
         var sizeScroll = new Scroll( $canvas, ctx, ctrlPosition, {
             onChange: function( percent ) {
                 var val = ( brush.maxSize - brush.minSize ) / 100 * percent + brush.minSize;
@@ -99,9 +105,9 @@ Canvas.prototype = {
                 me.onBrushChanged();
             }
         });
-
         ctrlPosition.x += sizeScroll.position.w + space;
 
+        ctrlPosition.x += addTitle( ctx, 'Насыщенность:', ctrlPosition ) + 10;
         var opacityScroll = new Scroll( $canvas, ctx, ctrlPosition, {
             onChange: function( percent ) {
                 var val = ( brush.maxOpacity - brush.minOpacity ) / 100 * percent + brush.minOpacity;
@@ -109,9 +115,7 @@ Canvas.prototype = {
                 me.onBrushChanged();
             }
         });
-
-
-        ctrlPosition.x += sizeScroll.position.w + space;
+        ctrlPosition.x += opacityScroll.position.w + space;
 
 
     },
@@ -136,7 +140,9 @@ Canvas.prototype = {
             ),
             $('<div/>', { 'class': 'toolbar', 'width': w, 'height': opts.cpHeight }).append(
                 $cp.addClass('cp'),
-                $palette.addClass('palette')
+                $('<div/>', { 'class': 'palette_wrap' }).append(
+                    $palette.addClass('palette')
+                )
             )
         );
 
@@ -147,56 +153,43 @@ Canvas.prototype = {
         };
     },
 
-    onBrushChanged: function() {
-        var brush = this.brush;
-        [ this.ctx, this.fakeCtx ].forEach(function( ctx, i ) {
-            ctx.strokeStyle = ctx.fillStyle = brush.color;
-            ctx.lineWidth = brush.size * 2;
-            //ctx.globalAlpha = brush.opacity;
-            ctx.save();
-        });
-        //this.$fake.css('opacity', brush.opacity );
-    },
-
     handleDraw: function( e ) {
-        var path = getCursorPosition( this.$canvas, e );
+        var path = getMouseXY( this.$canvas, e );
 
         switch ( e.type ) {
 
             case 'mousedown':
                 this.down = true;
-                this.path.x = [ path.x ];
-                this.path.y = [ path.y ];
+                this.mouse.x = [ path.x ];
+                this.mouse.y = [ path.y ];
                 this.draw( this.fakeCtx );
             break;
 
             case 'mousemove':
                 if ( !this.down ) return;
-                if( this.path.x == path.x && this.path.y == path.y) return;
+                if( this.mouse.x == path.x && this.mouse.y == path.y) return;
 
                 this.fakeCtx.clearRect( 0, 0, this.options.width, this.options.height );
-                this.path.x.push( path.x );
-                this.path.y.push( path.y );
+                this.mouse.x.push( path.x );
+                this.mouse.y.push( path.y );
                 this.draw( this.fakeCtx );
-
             break;
 
             case 'mouseup':
                 if ( !this.down ) return;
                 this.down = false;
                 this.fakeCtx.clearRect( 0, 0, this.options.width, this.options.height );
-                this.path.x.push( path.x );
-                this.path.y.push( path.y );
-                this.draw( this.fakeCtx );
+                this.mouse.x.push( path.x );
+                this.mouse.y.push( path.y );
+                this.draw( this.ctx );
 
             break;
         }
 
     },
-
     draw: function( ctx ) {
         var me = this,
-            path = me.path,
+            path = me.mouse,
             x = path.x, y = path.y,
             lenX = x.length;
 
@@ -236,17 +229,50 @@ Canvas.prototype = {
 };
 
 
+var CanvasModule = function( module, $canvas, ctx, pos ) {
+    var me = module;
+    me.$canvas = $canvas;
+    me.ctx = ctx || $canvas[0].getContext('2d');
+
+    me.addTitle = function( title, pos ) {
+        pos = normalizeXY( pos || this.position );
+        me.ctx.fillText( title, pos.x, pos.y );
+        return ctx.measureText( title ).width;
+    };
+
+    me.setPositionProps = function( w, h ) {
+        me.position = {
+            x: pos.x,
+            y: pos.y,
+            w: w,
+            h: h,
+            sx: normalizeXY(pos.x),
+            sy: normalizeXY(pos.y - h/2),
+            ex: normalizeXY(pos.x + w),
+            ey: normalizeXY(pos.y + h/2)
+        }
+    };
+    me.getMouse = function( e ) {
+        var pos = me.position,
+            cords = getMouseXY( me.$canvas, e),
+            x = cords.x, y = cords.y;
+
+        return {
+            isOver: !( x < pos.x || x > pos.ex || y < pos.sy || y > pos.ey ),
+            x: x,
+            y: y
+        };
+    };
+
+    return me;
+};
+
+
 var Scroll = function( $canvas, ctx, pos, options ) {
-    var me = this,
+    var me = new CanvasModule( this, $canvas, ctx, pos ),
         opts = me.options = $.extend( options, me.defaults );
 
-    me.$canvas = $canvas;
-    me.ctx = ctx;
-    me.position = {
-        x: pos.x, y: pos.y,
-        w: opts.ordW,
-        h: opts.markH + opts.spaceH + opts.handlerH
-    };
+    me.setPositionProps( opts.ordW, opts.markH + opts.spaceH + opts.handlerH+4 );
 
     $canvas.on({
         'mousedown': $.proxy( me._onMouseDown, me )
@@ -267,7 +293,7 @@ Scroll.prototype = {
         value: 75,
         marksCnt: 10,
         markW: 4,
-        markH: 5,
+        markH: 6,
         spaceH: 3,
         ordW: 96,
         ordH: 4,
@@ -294,14 +320,14 @@ Scroll.prototype = {
             cnt = opts.marksCnt,
             space = opts.ordW / cnt,
 
-            sy = pos.y - pos.h/2 - opts.spaceH,
+            sy = pos.sy,
             fy = sy + opts.markH,
             x = 0, i = 1;
 
         // draw Marks
         ctx.beginPath();
         for ( ; i < cnt; i++ ) {
-            x = pos.x + space * i;
+            x = normalizeXY( pos.x + space * i );
             ctx.moveTo( x, sy );
             ctx.lineTo( x, fy );
         }
@@ -315,15 +341,16 @@ Scroll.prototype = {
 
             ow = opts.ordW,
             oh = opts.ordH,
-            ox = pos.x,
-            oy = pos.y - oh/2,
-
             hw = opts.handlerW,
             hh = opts.handlerH,
-            hx = ( pos.x + ( ow - hw ) / 100 * percent ).toFixed(0)-.5,
-            hy = pos.y - hh / 2;
 
-        ctx.clearRect( pos.x - 2,  hy-opts.spaceH/2, pos.w + 4,  hy + opts.handlerH + opts.spaceH/2 );
+            hx = normalizeXY( pos.x + ( ow - hw ) / 100 * percent ),
+            hy = pos.sy + opts.markH + opts.spaceH,
+
+            ox = normalizeXY(pos.x),
+            oy = hy  + ( hh - oh ) / 2;
+
+        ctx.clearRect( pos.x - 2,  hy-opts.spaceH/2, pos.w + 4,  pos.h );
 
         // draw Ord
         ctx.fillRect( ox, oy, ow, oh );
@@ -337,7 +364,7 @@ Scroll.prototype = {
     _onMouseDown: function( e ) {
         var me = this,
             pos = me.position,
-            cords = getCursorPosition( this.$canvas, e),
+            cords = getMouseXY( this.$canvas, e),
             x = cords.x, y = cords.y;
 
         if ( x < pos.x || x > pos.x + pos.w ||
@@ -350,7 +377,7 @@ Scroll.prototype = {
         if( !this.focused ) return;
         var me = this,
             pos = me.position,
-            cords = getCursorPosition( this.$canvas, e),
+            cords = getMouseXY( this.$canvas, e),
             x = cords.x, y = cords.y,
             percent = 0;
 
@@ -365,18 +392,11 @@ Scroll.prototype = {
     }
 };
 
-
 var ColorPicker = function( $canvas, ctx, pos, options ) {
-    var me = this,
+    var me = new CanvasModule( this, $canvas, ctx, pos ),
         opts = me.options = $.extend( options, me.defaults );
 
-    me.$canvas = $canvas;
-    me.ctx = ctx;
-    me.position = {
-        x: pos.x, y: pos.y,
-        w: opts.trW,
-        h: opts.trH + opts.spaceH + opts.cbSize
-    };
+    me.setPositionProps( opts.trW,  opts.trH + opts.spaceH + opts.cbSize );
 
     me.createPalette();
     me.drawTriangle();
@@ -392,11 +412,11 @@ ColorPicker.prototype = {
     defaults: {
         value: '51,102,153',
         cbSize: 14,
-        blMargin: .0,
+        blMargin: .5,
         colorStep: 51,
-        trW: 14,
-        trH: 5,
-        spaceH: 2
+        trW: 16,
+        trH: 6,
+        spaceH: 3
     },
 
     createPalette: function() {
@@ -414,7 +434,7 @@ ColorPicker.prototype = {
             blMargin = opts.blMargin,
             color, cur_x, cur_y;
 
-
+        // Calculate and Draw color table
         for ( var b=0; b < 6; b++ ) { // blocks
             for ( var r = 0; r < 6; r++ ) { // rows
 
@@ -425,20 +445,21 @@ ColorPicker.prototype = {
                     cur_x = size * c + blMargin;
                     cur_x += b > 2 ? size * 6 * ( b - 3 ) : size * 6 * b;
 
-                    color = "rgb(" + step * b + ", " + step * c + ", " + step * r + ")";
-                    me.drawColorBlock( pCtx, { x: cur_x, y: cur_y}, color, 'rgb(0,0,0)' );
+                    color = [ step * b, step * c, step * r ].join(', ');
+                    me.drawColorBlock( pCtx, { x: cur_x, y: cur_y }, color, '0,0,0' );
                 }
             }
         }
 
+        // Attach Palette Events
         var prevHover = null;
         $palette.on({
             mousedown: function( e ) {
-                var cords = getCursorPosition( $palette, e );
+                var cords = getMouseXY( $palette, e );
                 me.setValue( me.getColor( cords ) );
             },
             mousemove: function ( e ) {
-                var cords = getCursorPosition( $palette, e),
+                var cords = getMouseXY( $palette, e),
                     color = me.getColor( cords );
 
                 if ( cords.x >= size * 18 || cords.y >= size * 12 ) return;
@@ -448,13 +469,13 @@ ColorPicker.prototype = {
 
                 if ( prevHover ) {
                     if ( prevHover.cords == cords ) return;
-                    me.drawColorBlock( pCtx, prevHover.cords, prevHover.color, 'black' );
+                    me.drawColorBlock( pCtx, prevHover.cords, prevHover.color, '0,0,0' );
                 }
 
                 prevHover = { cords: cords, color: color };
-                me.drawColorBlock( pCtx, cords, color, 'white');
+                me.drawColorBlock( pCtx, cords, color, '255,255,255');
             }
-        })
+        });
 
         me.$palette = $palette;
         me.paletteCtx = pCtx;
@@ -465,21 +486,22 @@ ColorPicker.prototype = {
         var ctx = this.ctx,
             pos = this.position,
             opts = this.options,
-            sy = pos.y - pos.h / 2;
+            sy = pos.sy;
+
+        ctx.clearRect( pos.x, sy, opts.trW, opts.trH );
 
         ctx.save();
-        ctx.clearRect( pos.x, sy, opts.trW, opts.trH );
         if ( hover ) ctx.fillStyle = 'white';
 
         ctx.beginPath();
         ctx.moveTo( pos.x + pos.w / 2, sy );
-        ctx.lineTo( pos.x + pos.w, sy + opts.trH );
-        ctx.lineTo( pos.x, sy + opts.trH );
+        ctx.lineTo( pos.ex, sy + opts.trH );
+        ctx.lineTo( pos.x,  sy + opts.trH );
         ctx.lineTo( pos.x + pos.w / 2, sy);
-        ctx.closePath();
-
         ctx.fill();
         ctx.stroke();
+        ctx.closePath();
+
         ctx.restore();
     },
     drawColorBlock: function( ctx, pos, fill, stroke ) {
@@ -488,27 +510,13 @@ ColorPicker.prototype = {
 
         ctx.save();
 
-        ctx.fillStyle = fill;
-        ctx.strokeStyle = stroke || fill;
+        ctx.fillStyle = 'rgb(' + fill + ')';
+        ctx.strokeStyle = 'rgb('+ stroke + ')' || fill;
+        ctx.clearRect( pos.x, pos.y, size, size );
         fill && ctx.fillRect( pos.x, pos.y, size, size );
         stroke && ctx.strokeRect( pos.x, pos.y, size, size );
 
         ctx.restore();
-    },
-
-    setValue: function( color ) {
-        if ( this.value === color ) return;
-
-        var pos = this.position,
-            opts = this.options;
-        this.drawColorBlock( this.ctx, {
-            x: pos.x + ( pos.w - opts.cbSize ) / 2,
-            y: pos.y - pos.h/2 + opts.trH + opts.spaceH
-        }, color );
-
-        this.value = color;
-        this.options.onChange( color );
-
     },
 
     getColor: function( cords ) {
@@ -520,37 +528,93 @@ ColorPicker.prototype = {
             r = ( cords.y - cords.y % size ) / size,
             b = ( c - c % 6 ) / 6 + ( r - r % 6 ) / 2;
 
-        return 'rgb('+[
+        return [
             step * b,
             step * ( c - b % 3 * 6 ),
             step * ( r - ( b - b % 3 ) / 3 * 6 )
-        ].join(',')+')';
+        ].join(',');
+    },
+    setValue: function( color ) {
+        if ( this.value === color ) return;
+
+        var pos = this.position,
+            opts = this.options;
+
+        this.drawColorBlock( this.ctx, {
+            x: pos.x + ( pos.w - opts.cbSize ) / 2,
+            y: pos.sy + opts.trH + opts.spaceH
+        }, color );
+
+        this.value = color;
+        this.options.onChange( color );
+
     },
 
     _onMouseDown: function( e ) {
         var me = this,
             pos = me.position,
-            cords = getCursorPosition( this.$canvas, e ),
-            x = cords.x, y = cords.y;
+            mouse = me.getMouse( e );
 
-        if ( x < pos.x || x > pos.x + pos.w || y < pos.y - pos.w || y > pos.y + pos.w ) {
+        if ( !mouse.isOver ) {
             this.$palette.slideUp();
-        } else this.$palette.slideToggle();
+        }
+        else {
+            this.$palette.slideToggle();
+        }
     }
 };
+
+
 
 
 
 function createCanvas( width, height ) {
     return $('<canvas width=' + width + ' height=' + height + '/>');
 }
-function getCursorPosition( $canvas, e ) {
+
+function addTitle( ctx, title, pos ) {
+    pos = normalizeXY( pos );
+    ctx.save()
+    ctx.font = '11px Tahoma, Arial, Verdana, Sans-Serif, Lucida Sans';
+    ctx.fillStyle = 'black';
+    ctx.textBaseline = 'middle';
+    ctx.beginPath();
+    ctx.fillText( title, pos.x, pos.y );
+    ctx.closePath();
+    var w = ctx.measureText( title ).width;
+    ctx.restore();
+    return w;
+}
+
+function getMouseXY( $canvas, e ) {
     var pos = $canvas.offset(),
         x = e.pageX - pos.left,
         y = e.pageY - pos.top;
     return { x: x, y: y };
 }
-function touchHandler (event) {
+
+function normalizeXY( cords ) {
+    if ( $.isNumeric( cords ) ) {
+        return parseInt(cords.toFixed(0)) + .5;
+    }
+
+    var x = 0, y = 0;
+    if ( $.isArray( cords ) ) {
+        x = cords[0];
+        y = cords[1];
+    }
+    else if ( cords.x ) {
+        x = cords.x;
+        y = cords.y;
+    }
+
+    return {
+        x: parseInt(x.toFixed(0)) + .5,
+        y: parseInt(y.toFixed(0)) + .5
+    };
+}
+
+function touchHandler( event ) {
     event = event.originalEvent;
     var touches = event.changedTouches,
         first = touches[0],

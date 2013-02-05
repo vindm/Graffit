@@ -6,17 +6,17 @@
   top: 50%;
   margin-left: -256px;
   margin-top: -192px;
-  border: 10px solid #000000;
 
 }
 
 canvas {
   position: absolute;
-  border: 1px solid #ccc;
 }
 
 .wrap {
   position:relative;
+  padding: 10px;
+  border: 1px solid #ccc;
 
   .main {
     z-index: 999;
@@ -28,10 +28,11 @@ canvas {
 }
 
 .toolbar {
+  padding: 10px;
+  border: 1px solid #DEDFE1;
+  border-top: 0;
 
   .cp {
-    border-top: 1px solid #DEDFE1;
-
   }
   .palette {
     bottom: 64px;

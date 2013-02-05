@@ -7,18 +7,18 @@
   top: 50%;
   margin-left: -256px;
   margin-top: -192px;
-  border: 10px solid #000000;
 }
 
-/* line 13, ../sass/main.scss */
+/* line 12, ../sass/main.scss */
 canvas {
   position: absolute;
-  border: 1px solid #ccc;
 }
 
-/* line 18, ../sass/main.scss */
+/* line 16, ../sass/main.scss */
 .wrap {
   position: relative;
+  padding: 10px;
+  border: 1px solid #ccc;
 }
 /* line 21, ../sass/main.scss */
 .wrap .main {
@@ -29,11 +29,13 @@ canvas {
   z-index: 1000;
 }
 
-/* line 32, ../sass/main.scss */
-.toolbar .cp {
-  border-top: 1px solid #DEDFE1;
+/* line 30, ../sass/main.scss */
+.toolbar {
+  padding: 10px;
+  border: 1px solid #DEDFE1;
+  border-top: 0;
 }
-/* line 36, ../sass/main.scss */
+/* line 37, ../sass/main.scss */
 .toolbar .palette {
   bottom: 64px;
   z-index: 1001;
