@@ -1,0 +1,44 @@
+.graffit {
+  position: absolute;
+  width: 512px;
+  height: 384px;
+  left: 50%;
+  top: 50%;
+  margin-left: -256px;
+  margin-top: -192px;
+  border: 10px solid #000000;
+
+}
+
+canvas {
+  position: absolute;
+  border: 1px solid #ccc;
+}
+
+.wrap {
+  position:relative;
+
+  .main {
+    z-index: 999;
+  }
+  .fake {
+    z-index: 1000;
+  }
+
+}
+
+.toolbar {
+
+  .cp {
+    border-top: 1px solid #DEDFE1;
+
+  }
+  .palette {
+    bottom: 64px;
+    z-index: 1001;
+    display: none;
+    background-color: #666;
+  }
+
+
+}

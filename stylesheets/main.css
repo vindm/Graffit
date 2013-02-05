@@ -1,0 +1,42 @@
+/* line 1, ../sass/main.scss */
+.graffit {
+  position: absolute;
+  width: 512px;
+  height: 384px;
+  left: 50%;
+  top: 50%;
+  margin-left: -256px;
+  margin-top: -192px;
+  border: 10px solid #000000;
+}
+
+/* line 13, ../sass/main.scss */
+canvas {
+  position: absolute;
+  border: 1px solid #ccc;
+}
+
+/* line 18, ../sass/main.scss */
+.wrap {
+  position: relative;
+}
+/* line 21, ../sass/main.scss */
+.wrap .main {
+  z-index: 999;
+}
+/* line 24, ../sass/main.scss */
+.wrap .fake {
+  z-index: 1000;
+}
+
+/* line 32, ../sass/main.scss */
+.toolbar .cp {
+  border-top: 1px solid #DEDFE1;
+}
+/* line 36, ../sass/main.scss */
+.toolbar .palette {
+  bottom: 64px;
+  z-index: 1001;
+  display: none;
+  background-color: #666;
+}
