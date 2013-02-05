@@ -22,11 +22,11 @@ function Canvas( elem, options ) {
 Canvas.prototype = {
 
     defaults: {
-        width: 480,
-        height: 270,
-        cpHeight: 64,
+        width: 590,
+        height: 280,
+        cpHeight: 65,
         brush: {
-            size: 6, minSize: .051, maxSize: 25,
+            size: 6, minSize: .051, maxSize: 32,
             opacity: .75, minOpacity:.01, maxOpacity: 1,
             color: '51,102,153'
         },
@@ -66,6 +66,8 @@ Canvas.prototype = {
         $(window).on('mousemove mouseup', $.proxy( me.handleDraw, me ));
 
     },
+
+
     addControls: function( ) {
         var me = this,
             opts = this.options,
@@ -85,10 +87,25 @@ Canvas.prototype = {
         var space = opts.controls.space,
             ctrlPosition = { x: space, y: opts.cpHeight/2 };
 
-        ctrlPosition.x += addTitle( ctx, 'Цвет:', ctrlPosition ) + 10;
+        var drawSample = function() {
+            ctx.save();
+            ctx.clearRect(space-2, 0, brush.maxSize*2+4, brush.maxSize*2+2);
+            ctx.fillStyle = "rgba("+brush.color+", "+brush.opacity+")";
+            ctx.beginPath();
+            ctx.arc( space+brush.maxSize, ctrlPosition.y, normalizeXY(brush.size), 0, Math.PI * 2, false);
+            ctx.fill();
+            ctx.closePath();
+            ctx.restore();
+        };
+
+        drawSample();
+        ctrlPosition.x += brush.maxSize*2 + space*2;
+
+            ctrlPosition.x += addTitle( ctx, 'Цвет:', ctrlPosition ) + 10;
         var colorPicker = new ColorPicker( $canvas, ctx, ctrlPosition, {
             onChange: function( color ) {
                 me.brush.color = color;
+                drawSample();
                 me.onBrushChanged();
             }
         });
@@ -100,23 +117,22 @@ Canvas.prototype = {
         ctrlPosition.x += addTitle( ctx, 'Толщина:', ctrlPosition ) + 10;
         var sizeScroll = new Scroll( $canvas, ctx, ctrlPosition, {
             onChange: function( percent ) {
-                var val = ( brush.maxSize - brush.minSize ) / 100 * percent + brush.minSize;
-                me.brush.size = val;
+                me.brush.size = ( brush.maxSize - brush.minSize ) / 100 * percent + brush.minSize;
+                drawSample();
                 me.onBrushChanged();
             }
         });
         ctrlPosition.x += sizeScroll.position.w + space;
 
-        ctrlPosition.x += addTitle( ctx, 'Насыщенность:', ctrlPosition ) + 10;
+        ctrlPosition.x += addTitle( ctx, 'Интенсивность:', ctrlPosition ) + 10;
         var opacityScroll = new Scroll( $canvas, ctx, ctrlPosition, {
             onChange: function( percent ) {
-                var val = ( brush.maxOpacity - brush.minOpacity ) / 100 * percent + brush.minOpacity;
-                me.brush.opacity = val;
+                me.brush.opacity = ( brush.maxOpacity - brush.minOpacity ) / 100 * percent + brush.minOpacity;
+                drawSample();
                 me.onBrushChanged();
             }
         });
         ctrlPosition.x += opacityScroll.position.w + space;
-
 
     },
     build: function() {
@@ -179,8 +195,6 @@ Canvas.prototype = {
                 if ( !this.down ) return;
                 this.down = false;
                 this.fakeCtx.clearRect( 0, 0, this.options.width, this.options.height );
-                this.mouse.x.push( path.x );
-                this.mouse.y.push( path.y );
                 this.draw( this.ctx );
 
             break;
@@ -197,7 +211,7 @@ Canvas.prototype = {
         ctx.moveTo( x[0], y[0] );
 
         if ( lenX < 2 ) {
-            ctx.lineTo( x[0] + .51, y[0] );
+            ctx.lineTo( x[0] + 0.51, y[0] );
             ctx.stroke();
             ctx.closePath();
             return;
@@ -268,129 +282,6 @@ var CanvasModule = function( module, $canvas, ctx, pos ) {
 };
 
 
-var Scroll = function( $canvas, ctx, pos, options ) {
-    var me = new CanvasModule( this, $canvas, ctx, pos ),
-        opts = me.options = $.extend( options, me.defaults );
-
-    me.setPositionProps( opts.ordW, opts.markH + opts.spaceH + opts.handlerH+4 );
-
-    $canvas.on({
-        'mousedown': $.proxy( me._onMouseDown, me )
-    });
-    $( window).on({
-        'mousemove': $.proxy( me._onMouseMove, me ),
-        'mouseup'  : $.proxy( me._onMouseUp, me )
-    });
-
-    me.drawStatic();
-    me.setValue( opts.value );
-
-    return me;
-};
-Scroll.prototype = {
-
-    defaults: {
-        value: 75,
-        marksCnt: 10,
-        markW: 4,
-        markH: 6,
-        spaceH: 3,
-        ordW: 96,
-        ordH: 4,
-        handlerW: 6,
-        handlerH: 10
-    },
-
-    setValue: function( percent ) {
-        if( percent > 100 ) percent = 100;
-        else if( percent < 0 ) percent = 0;
-
-        if ( this.value == percent ) return;
-        this.value = percent;
-
-        this.drawDynamic();
-        this.options.onChange( percent );
-    },
-
-    drawStatic : function() {
-        var ctx = this.ctx,
-            opts = this.options,
-            pos = this.position,
-
-            cnt = opts.marksCnt,
-            space = opts.ordW / cnt,
-
-            sy = pos.sy,
-            fy = sy + opts.markH,
-            x = 0, i = 1;
-
-        // draw Marks
-        ctx.beginPath();
-        for ( ; i < cnt; i++ ) {
-            x = normalizeXY( pos.x + space * i );
-            ctx.moveTo( x, sy );
-            ctx.lineTo( x, fy );
-        }
-        ctx.stroke();
-    },
-    drawDynamic: function() {
-        var ctx = this.ctx,
-            opts = this.options,
-            pos = this.position,
-            percent = this.value,
-
-            ow = opts.ordW,
-            oh = opts.ordH,
-            hw = opts.handlerW,
-            hh = opts.handlerH,
-
-            hx = normalizeXY( pos.x + ( ow - hw ) / 100 * percent ),
-            hy = pos.sy + opts.markH + opts.spaceH,
-
-            ox = normalizeXY(pos.x),
-            oy = hy  + ( hh - oh ) / 2;
-
-        ctx.clearRect( pos.x - 2,  hy-opts.spaceH/2, pos.w + 4,  pos.h );
-
-        // draw Ord
-        ctx.fillRect( ox, oy, ow, oh );
-        ctx.strokeRect( ox, oy, ow, oh );
-
-        // draw Handler
-        ctx.fillRect( hx, hy, hw, hh );
-        ctx.strokeRect( hx, hy, hw, hh );
-    },
-
-    _onMouseDown: function( e ) {
-        var me = this,
-            pos = me.position,
-            cords = getMouseXY( this.$canvas, e),
-            x = cords.x, y = cords.y;
-
-        if ( x < pos.x || x > pos.x + pos.w ||
-             y < pos.y - pos.w || y > pos.y + pos.w ) return;
-
-        this.focused = true;
-        this.setValue( ( x - pos.x ) / pos.w * 100 );
-    },
-    _onMouseMove: function( e ) {
-        if( !this.focused ) return;
-        var me = this,
-            pos = me.position,
-            cords = getMouseXY( this.$canvas, e),
-            x = cords.x, y = cords.y,
-            percent = 0;
-
-        if ( x < pos.x ) percent = 0;
-        else if ( x > pos.x + pos.w ) percent = 100;
-        else percent = ( x - pos.x ) / pos.w * 100;
-
-        me.setValue( percent );
-    },
-    _onMouseUp: function() {
-        this.focused = false;
-    }
-};
 
 var ColorPicker = function( $canvas, ctx, pos, options ) {
     var me = new CanvasModule( this, $canvas, ctx, pos ),
@@ -512,7 +403,7 @@ ColorPicker.prototype = {
 
         ctx.fillStyle = 'rgb(' + fill + ')';
         ctx.strokeStyle = 'rgb('+ stroke + ')' || fill;
-        ctx.clearRect( pos.x, pos.y, size, size );
+        ctx.clearRect( pos.x-.5, pos.y-.5, size+1, size+1 );
         fill && ctx.fillRect( pos.x, pos.y, size, size );
         stroke && ctx.strokeRect( pos.x, pos.y, size, size );
 
@@ -564,7 +455,129 @@ ColorPicker.prototype = {
     }
 };
 
+var Scroll = function( $canvas, ctx, pos, options ) {
+    var me = new CanvasModule( this, $canvas, ctx, pos ),
+        opts = me.options = $.extend( options, me.defaults );
 
+    me.setPositionProps( opts.ordW, opts.markH + opts.spaceH + opts.handlerH+4 );
+
+    $canvas.on({
+        'mousedown': $.proxy( me._onMouseDown, me )
+    });
+    $( window).on({
+        'mousemove': $.proxy( me._onMouseMove, me ),
+        'mouseup'  : $.proxy( me._onMouseUp, me )
+    });
+
+    me.drawStatic();
+    me.setValue( opts.value );
+
+    return me;
+};
+Scroll.prototype = {
+
+    defaults: {
+        value: 75,
+        marksCnt: 10,
+        markW: 4,
+        markH: 6,
+        spaceH: 3,
+        ordW: 96,
+        ordH: 4,
+        handlerW: 6,
+        handlerH: 10
+    },
+
+    setValue: function( percent ) {
+        if( percent > 100 ) percent = 100;
+        else if( percent < 0 ) percent = 0;
+
+        if ( this.value == percent ) return;
+        this.value = percent;
+
+        this.drawDynamic();
+        this.options.onChange( percent );
+    },
+
+    drawStatic : function() {
+        var ctx = this.ctx,
+            opts = this.options,
+            pos = this.position,
+
+            cnt = opts.marksCnt,
+            space = opts.ordW / cnt,
+
+            sy = pos.sy,
+            fy = sy + opts.markH,
+            x = 0, i = 1;
+
+        // draw Marks
+        ctx.beginPath();
+        for ( ; i < cnt; i++ ) {
+            x = normalizeXY( pos.x + space * i );
+            ctx.moveTo( x, sy );
+            ctx.lineTo( x, fy );
+        }
+        ctx.stroke();
+    },
+    drawDynamic: function() {
+        var ctx = this.ctx,
+            opts = this.options,
+            pos = this.position,
+            percent = this.value,
+
+            ow = opts.ordW,
+            oh = opts.ordH,
+            hw = opts.handlerW,
+            hh = opts.handlerH,
+
+            hx = normalizeXY( pos.x + ( ow - hw ) / 100 * percent ),
+            hy = pos.sy + opts.markH + opts.spaceH,
+
+            ox = normalizeXY(pos.x),
+            oy = hy  + ( hh - oh ) / 2;
+
+        ctx.clearRect( pos.x - 2,  hy-opts.spaceH/2, pos.w + 4,  pos.h );
+
+        // draw Ord
+        ctx.fillRect( ox, oy, ow, oh );
+        ctx.strokeRect( ox, oy, ow, oh );
+
+        // draw Handler
+        ctx.fillRect( hx, hy, hw, hh );
+        ctx.strokeRect( hx, hy, hw, hh );
+    },
+
+    _onMouseDown: function( e ) {
+        var me = this,
+            pos = me.position,
+            cords = getMouseXY( this.$canvas, e),
+            x = cords.x, y = cords.y;
+
+        if ( x < pos.x || x > pos.x + pos.w ||
+            y < pos.y - pos.w || y > pos.y + pos.w ) return;
+
+        this.focused = true;
+        this.setValue( ( x - pos.x ) / pos.w * 100 );
+    },
+    _onMouseMove: function( e ) {
+        if( !this.focused ) return;
+        var me = this,
+            pos = me.position,
+            cords = getMouseXY( this.$canvas, e),
+            x = cords.x, y = cords.y,
+            percent = 0;
+
+        if ( x < pos.x ) percent = 0;
+        else if ( x > pos.x + pos.w ) percent = 100;
+        else percent = ( x - pos.x ) / pos.w * 100;
+
+        me.setValue( percent );
+    },
+    _onMouseUp: function() {
+        this.focused = false;
+    }
+};
 
 
 

@@ -17,25 +17,23 @@ canvas {
 /* line 16, ../sass/main.scss */
 .wrap {
   position: relative;
-  padding: 10px;
   border: 1px solid #ccc;
 }
-/* line 21, ../sass/main.scss */
+/* line 20, ../sass/main.scss */
 .wrap .main {
   z-index: 999;
 }
-/* line 24, ../sass/main.scss */
+/* line 23, ../sass/main.scss */
 .wrap .fake {
   z-index: 1000;
 }
 
-/* line 30, ../sass/main.scss */
+/* line 29, ../sass/main.scss */
 .toolbar {
-  padding: 10px;
   border: 1px solid #DEDFE1;
   border-top: 0;
 }
-/* line 37, ../sass/main.scss */
+/* line 35, ../sass/main.scss */
 .toolbar .palette {
   bottom: 64px;
   z-index: 1001;
