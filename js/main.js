@@ -443,15 +443,11 @@ ColorPicker.prototype = {
 
     _onMouseDown: function( e ) {
         var me = this,
-            pos = me.position,
-            mouse = me.getMouse( e );
+            mouse = me.getMouse( e),
+            wrap = this.$palette.parent('.palette_wrap');
 
-        if ( !mouse.isOver ) {
-            this.$palette.slideUp();
-        }
-        else {
-            this.$palette.slideToggle();
-        }
+        if ( !mouse.isOver ) wrap.fadeOut();
+        else wrap.fadeToggle();
     }
 };
 

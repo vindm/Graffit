@@ -34,9 +34,18 @@ canvas {
   border-top: 0;
 }
 /* line 35, ../sass/main.scss */
-.toolbar .palette {
-  bottom: 64px;
-  z-index: 1001;
+.toolbar .palette_wrap {
   display: none;
-  background-color: #666;
+  position: absolute;
+  bottom: 60px;
+  left: 68px;
+  width: 252px;
+  height: 168px;
+  padding: 8px;
+  background-color: #E5E5E5;
+  overflow: hidden;
+}
+/* line 47, ../sass/main.scss */
+.toolbar .palette {
+  z-index: 1001;
 }

@@ -32,11 +32,20 @@ canvas {
 
   .cp {
   }
-  .palette {
-    bottom: 64px;
-    z-index: 1001;
+  .palette_wrap{
     display: none;
-    background-color: #666;
+    position: absolute;
+    bottom: 60px;
+    left: 68px;
+    width: 14*18px;
+    height: 14*12px;
+    padding: 8px;
+
+    background-color: #E5E5E5;
+    overflow: hidden;
+  }
+  .palette {
+    z-index: 1001;
   }
 
 
