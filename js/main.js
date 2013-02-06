@@ -50,10 +50,10 @@ Canvas.prototype = {
     addTopBar: function() {
         var me = this;
 
-        me.cleanBtn  = $('<a/>', { class: 'cleanBtn',  title: 'Очистить', text: 'Очистить' });
-        me.cancelBtn = $('<a/>', { class: 'cancelBtn', title: 'Отменить', text: 'Отменить' });
-        me.saveBtn   = $('<a/>', { class: 'saveBtn', title: 'Сохранить', text: 'Сохранить' });
-        me.fullBtn   = $('<a/>', { class: 'fullBtn', title: 'Увеличить', text: 'Увеличить' });
+        me.cleanBtn  = $('<a/>', { 'class': 'cleanBtn',  'title': 'Очистить', 'text': 'Очистить' });
+        me.cancelBtn = $('<a/>', { 'class': 'cancelBtn', 'title': 'Отменить', 'text': 'Отменить' });
+        me.saveBtn   = $('<a/>', { 'class': 'saveBtn', 'title': 'Сохранить', 'text': 'Сохранить' });
+        me.fullBtn   = $('<a/>', { 'class': 'fullBtn', 'title': 'Увеличить', 'text': 'Увеличить' });
 
         me.cleanBtn.on('mousedown', $.proxy( me.clean, me ));
         me.cancelBtn.on('mousedown', $.proxy( me.backHistory, me ));
@@ -156,14 +156,14 @@ Canvas.prototype = {
         me.$elem.append(
 
             $('<header/>').append(
-                $('<h3/>', { class: 'title', text: 'Ваше граффити на  стену Mr Jesus' })
+                $('<h3/>', { 'class': 'title', 'text': 'Ваше граффити на  стену Mr Jesus' })
             ),
 
-            $('<div/>', { class: 'topbar' }).append(
-                $('<div/>', { class: 'fl_l'} ).append(
+            $('<div/>', { 'class': 'topbar' }).append(
+                $('<div/>', { 'class': 'fl_l'} ).append(
                     me.cleanBtn, '<span> | </span>', me.cancelBtn
                 ),
-                $('<div/>', { class: 'fl_r'} ).append(
+                $('<div/>', { 'class': 'fl_r'} ).append(
                     me.saveBtn, '<span> | </span>', me.fullBtn
                 )
             ),
