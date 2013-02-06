@@ -1,0 +1,75 @@
+@mixin gradient( $from, $to, $dir: top ){
+  background-image: -webkit-linear-gradient($dir, $from, $to);
+  background-image:    -moz-linear-gradient($dir, $from, $to);
+  background-image:     -ms-linear-gradient($dir, $from, $to);
+  background-image:      -o-linear-gradient($dir, $from, $to);
+  background-image:         linear-gradient($dir, $from, $to);
+}
+
+@mixin borderRadius( $r ) {
+  -webkit-border-radius: $r;
+     -moz-border-radius: $r;
+       -o-border-radius: $r;
+          border-radius: $r;
+}
+
+@mixin transition( $prop, $duration, $timing: ease-in-out ) {
+  -webkit-transition-timing-function: $timing;
+         -webkit-transition-property: #{$prop};
+         -webkit-transition-duration: #{$duration};
+
+     -moz-transition-timing-function: $timing;
+            -moz-transition-property: #{$prop};
+            -moz-transition-duration: #{$duration};
+
+      -ms-transition-timing-function: $timing;
+             -ms-transition-property: #{$prop};
+             -ms-transition-duration: #{$duration};
+
+       -o-transition-timing-function: $timing;
+              -o-transition-property: #{$prop};
+              -o-transition-duration: #{$duration};
+
+          transition-timing-function: $timing;
+                 transition-property: #{$prop};
+                 transition-duration: #{$duration};
+}
+
+@mixin transform( $val ) {
+  -webkit-transform: $val;
+     -moz-transform: $val;
+      -ms-transform: $val;
+       -o-transform: $val;
+          transform: $val;
+}
+
+@mixin colorlink( $linkColor ) {
+  color: $linkColor;
+  &:link    { color: $linkColor; }
+  &:visited { color: lighten($linkColor, 5%) }
+  &:hover   { color: darken($linkColor, 15%) }
+}
+
+
+@mixin absoluteCentered( $w, $h, $p:0 ) {
+  position: absolute;
+  left: 50%;
+  top : 50%;
+  width : $w - 2*$p;
+  height: $h - 2*$p;
+  margin-left: -$w/2;
+  margin-top : -$h/2;
+  padding: $p;
+}
+
+@mixin respond-to($media) {
+  @if $media == handhelds {
+    @media only screen and (max-width: 479px) { @content; }
+  }
+  @else if $media == wide-handhelds {
+    @media only screen and (min-width: 480px) and (max-width: 767px) { @content; }
+  }
+  @else if $media == tablets {
+    @media only screen and (min-width: 768px) and (max-width: 959px) { @content; }
+  }
+}

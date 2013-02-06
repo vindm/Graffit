@@ -1,0 +1,160 @@
+/* line 3, ../sass/main.scss */
+body {
+  padding: 0;
+  margin: 0;
+  color: #000;
+  font-family: tahoma, arial, verdana, sans-serif, Lucida Sans;
+  font-size: 11px;
+  font-weight: normal;
+}
+
+/* line 11, ../sass/main.scss */
+* {
+  -o-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* line 19, ../sass/main.scss */
+a {
+  color: #2B587A;
+  text-decoration: none;
+  cursor: pointer;
+}
+/* line 24, ../sass/main.scss */
+a:hover {
+  text-decoration: underline;
+}
+
+/* line 28, ../sass/main.scss */
+.fl_l {
+  float: left;
+}
+
+/* line 29, ../sass/main.scss */
+.fl_r {
+  float: right;
+}
+
+/* line 33, ../sass/main.scss */
+.graffit {
+  margin: 0 auto;
+  background-color: #FFF;
+  border: 1px solid #d7d7d7;
+}
+/* line 39, ../sass/main.scss */
+.graffit.full {
+  border: 0;
+}
+/* line 41, ../sass/main.scss */
+.graffit.full .canvas_wrap {
+  padding-bottom: 16px;
+}
+/* line 43, ../sass/main.scss */
+.graffit.full .canvas_wrap .canvas_aligner {
+  margin-bottom: 0;
+}
+/* line 48, ../sass/main.scss */
+.graffit header {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background-color: #597DA3;
+  color: #fff;
+  font-size: 1em;
+  font-weight: normal;
+}
+/* line 57, ../sass/main.scss */
+.graffit header .title {
+  padding: 17px 20px 18px;
+  margin: 0;
+  border: none;
+  color: #FFFFFF;
+  background: #597BA5;
+  font-weight: bold;
+  font-size: 1.09em;
+}
+/* line 68, ../sass/main.scss */
+.graffit canvas {
+  position: absolute;
+}
+/* line 72, ../sass/main.scss */
+.graffit .topbar {
+  height: 17px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #fff;
+  overflow: hidden;
+  padding: 15px 20px 0px 20px;
+  border-bottom: 1px solid #DEDFE1;
+}
+/* line 81, ../sass/main.scss */
+.graffit .topbar span {
+  color: #777;
+}
+/* line 86, ../sass/main.scss */
+.graffit .canvas_wrap {
+  z-index: 1011;
+  padding: 16px;
+  padding-bottom: 0;
+  border-bottom: 1px solid #DEDFE1;
+  background-color: #f7f7f7;
+}
+/* line 93, ../sass/main.scss */
+.graffit .canvas_wrap .canvas_aligner {
+  z-index: 1010;
+  margin: 0 auto;
+  margin-bottom: 5px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #ccc;
+}
+/* line 104, ../sass/main.scss */
+.graffit .canvas_wrap .main, .graffit .canvas_wrap .fake {
+  margin: 0 auto;
+}
+/* line 108, ../sass/main.scss */
+.graffit .canvas_wrap .main {
+  z-index: 999;
+}
+/* line 111, ../sass/main.scss */
+.graffit .canvas_wrap .fake {
+  z-index: 1001;
+}
+/* line 114, ../sass/main.scss */
+.graffit .canvas_wrap .hist {
+  z-index: 1000;
+  display: none;
+  background: #ffffff;
+}
+/* line 122, ../sass/main.scss */
+.graffit .resizer {
+  margin: 0;
+  padding: 0;
+  height: 15px;
+  background: url("http://st0.userapi.com/images/pics/graffiti_resizer.gif") no-repeat center 1px;
+  cursor: s-resize;
+}
+/* line 130, ../sass/main.scss */
+.graffit .toolbar {
+  margin: 0 auto;
+}
+/* line 133, ../sass/main.scss */
+.graffit .toolbar .palette_wrap {
+  z-index: 1001;
+  display: none;
+  position: relative;
+  bottom: 180px;
+  left: 68px;
+  width: 252px;
+  height: 168px;
+  padding: 8px;
+  background-color: #E5E5E5;
+  overflow: hidden;
+}
+/* line 146, ../sass/main.scss */
+.graffit .toolbar .palette {
+  z-index: 1002;
+}
