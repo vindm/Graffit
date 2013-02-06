@@ -222,7 +222,7 @@ Canvas.prototype = {
                 var newWidth = newHeight / opts.height * opts.width;
                 this.resW = newWidth;
 
-                wrap.width(newWidth).height(newHeight)
+                wrap.width(newWidth).height(newHeight);
                 this.$elem
                     .height( opts.headerHeight + opts.topbarHeight + newHeight + opts.resizerHeight + opts.cpHeight + 40 )
                     .width( newWidth + 32 );
@@ -464,7 +464,7 @@ Canvas.prototype = {
             me.backBlocked = true;
 
             if( me.checkPoint != '' ) {
-                $('<img/>', { src: thmeis.checkPoint }).on('load', function() {
+                $('<img/>', { src: me.checkPoint }).on('load', function() {
                     me.$hist.fadeIn(200, function() {
                         me.ctx.clearRect( 0, 0, opts.width, opts.height );
                         me.ctx.drawImage( this, 0, 0, opts.width, opts.height );
