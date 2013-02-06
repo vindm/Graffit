@@ -224,7 +224,7 @@ Canvas.prototype = {
 
                 wrap.width(newWidth).height(newHeight);
                 this.$elem
-                    .height( opts.headerHeight + opts.topbarHeight + newHeight + opts.resizerHeight + opts.cpHeight + 48 )
+                    .height( opts.headerHeight + opts.topbarHeight + newHeight + opts.resizerHeight + opts.cpHeight + 44 )
                     .width( newWidth + 40 );
 
                 this.onResize && this.onResize(newWidth, newHeight);
@@ -250,7 +250,7 @@ Canvas.prototype = {
         var opts = this.options;
         if ( !only ) {
             this.$elem
-                .height( opts.headerHeight + opts.topbarHeight + opts.height + opts.resizerHeight + opts.cpHeight + 48 )
+                .height( opts.headerHeight + opts.topbarHeight + opts.height + opts.resizerHeight + opts.cpHeight + 44 )
                 .width( opts.width + 40 );
         }
         this.$canvas.parent().find('canvas')
@@ -618,6 +618,7 @@ var ColorPicker = function( $canvas, ctx, pos, options ) {
     me.setValue( opts.value );
 
     $( window ).on({
+        'mousemove': $.proxy( me._onMouseOver, me ),
         'mousedown': $.proxy( me._onMouseDown, me )
     });
 
@@ -765,6 +766,25 @@ ColorPicker.prototype = {
 
     },
 
+    hover: false,
+    _onMouseOver: function( e ) {
+        var me = this,
+            mouse = me.getMouse( e );
+        if( mouse.isOver ) {
+            if ( !this.hover ) {
+                this.drawTriangle( true );
+                this.$canvas.css('cursor', 'pointer');
+                this.hover = true;
+            }
+        } else {
+            if ( this.hover ) {
+                this.drawTriangle();
+                this.$canvas.css('cursor', 'default');
+                this.hover = false;
+            }
+        }
+
+    },
     _onMouseDown: function( e ) {
         var me = this,
             mouse = me.getMouse( e),
