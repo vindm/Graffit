@@ -16,8 +16,11 @@ function Canvas( elem, options ) {
     me.addResizer();
     me.addCanvases();
     me.addControls();
+
     me.resizeCanvases();
     me.build();
+
+
 }
 Canvas.prototype = {
 
@@ -75,7 +78,7 @@ Canvas.prototype = {
         me.histCtx = me.$hist[0].getContext('2d');
 
 
-        me.$fake.on('mousedown click', $.proxy( me.handleDrawEvents, me ));
+        me.$fake.on('mousedown', $.proxy( me.handleDrawEvents, me ));
         $(window).on('mousemove mouseup', $.proxy( me.handleDrawEvents, me ));
 
     },
@@ -968,6 +971,8 @@ function touchHandler( event ) {
 
 
 $(function () {
+    $(window).on('touchstart touchmove touchend', touchHandler);
+    $('canvas').on('touchstart touchmove touchend', touchHandler);
     new Canvas( $(".graffit")[0] );
 });
 
