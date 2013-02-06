@@ -224,8 +224,8 @@ Canvas.prototype = {
 
                 wrap.width(newWidth).height(newHeight);
                 this.$elem
-                    .height( opts.headerHeight + opts.topbarHeight + newHeight + opts.resizerHeight + opts.cpHeight + 40 )
-                    .width( newWidth + 32 );
+                    .height( opts.headerHeight + opts.topbarHeight + newHeight + opts.resizerHeight + opts.cpHeight + 48 )
+                    .width( newWidth + 40 );
 
                 this.onResize && this.onResize(newWidth, newHeight);
 
@@ -250,8 +250,8 @@ Canvas.prototype = {
         var opts = this.options;
         if ( !only ) {
             this.$elem
-                .height( opts.headerHeight + opts.topbarHeight + opts.height + opts.resizerHeight + opts.cpHeight + 40 )
-                .width( opts.width + 32 );
+                .height( opts.headerHeight + opts.topbarHeight + opts.height + opts.resizerHeight + opts.cpHeight + 48 )
+                .width( opts.width + 40 );
         }
         this.$canvas.parent().find('canvas')
             .attr('width', opts.width )
@@ -267,8 +267,8 @@ Canvas.prototype = {
             me.fsEnabled = true;
             me.blockResize = true;
 
-            var width = (window.innerWidth - 40),
-                height = Math.min( (297 / 594) * width, window.innerHeight - 133);
+            var width = (window.innerWidth - 48),
+                height = Math.min( (297 / 594) * width, window.innerHeight - 141);
 
             width = height * ( 594 / 297 );
 
@@ -308,8 +308,8 @@ Canvas.prototype = {
 
             me.$canvas.hide();
             me.$elem.animate({
-                width: opts.width + 32,
-                height: opts.headerHeight + opts.topbarHeight + opts.height + opts.resizerHeight + opts.cpHeight + 40
+                width: opts.width + 40,
+                height: opts.headerHeight + opts.topbarHeight + opts.height + opts.resizerHeight + opts.cpHeight + 44
             }, time, function() {
                 $(this).removeClass('full');
                 me.fullBtn.text('Увеличить').attr('title', 'Увеличить');

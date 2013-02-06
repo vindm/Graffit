@@ -50,7 +50,7 @@ a:hover {
 }
 /* line 41, ../sass/main.scss */
 .graffit.full .canvas_wrap {
-  padding-bottom: 16px;
+  padding-bottom: 20px;
 }
 /* line 43, ../sass/main.scss */
 .graffit.full .canvas_wrap .canvas_aligner {
@@ -97,7 +97,7 @@ a:hover {
 /* line 86, ../sass/main.scss */
 .graffit .canvas_wrap {
   z-index: 1011;
-  padding: 16px;
+  padding: 20px;
   padding-bottom: 0;
   border-bottom: 1px solid #DEDFE1;
   background-color: #f7f7f7;

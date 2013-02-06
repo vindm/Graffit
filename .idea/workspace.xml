@@ -26,7 +26,7 @@
       <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="14" column="0" selection-start="406" selection-end="406" vertical-scroll-proportion="-8.75">
+            <state line="8" column="24" selection-start="324" selection-end="324" vertical-scroll-proportion="-5.0">
               <folding />
             </state>
           </provider>
@@ -35,7 +35,7 @@
       <file leaf-file-name="main.js" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="461" column="23" selection-start="14588" selection-end="14588" vertical-scroll-proportion="0.445215">
+            <state line="310" column="38" selection-start="10036" selection-end="10036" vertical-scroll-proportion="0.85714287">
               <folding>
                 <element signature="e#413#780#0" expanded="false" />
                 <element signature="e#950#1644#0" expanded="false" />
@@ -45,12 +45,13 @@
                 <element signature="e#4088#4286#0" expanded="false" />
                 <element signature="e#4495#4705#0" expanded="false" />
                 <element signature="e#4798#6240#0" expanded="false" />
+                <element signature="e#6281#8035#0" expanded="false" />
                 <element signature="e#8074#8462#0" expanded="false" />
-                <element signature="e#8491#10735#0" expanded="false" />
                 <element signature="e#10776#10864#0" expanded="false" />
                 <element signature="e#10903#12239#0" expanded="false" />
                 <element signature="e#12273#13909#0" expanded="false" />
                 <element signature="e#13947#14112#0" expanded="false" />
+                <element signature="e#14142#15205#0" expanded="false" />
                 <element signature="e#15235#16287#0" expanded="false" />
                 <element signature="e#16319#16880#0" expanded="false" />
                 <element signature="e#16931#17623#0" expanded="false" />
@@ -87,7 +88,7 @@
       <file leaf-file-name="main.scss" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/sass/main.scss">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="135" column="25" selection-start="2233" selection-end="2233" vertical-scroll-proportion="0.0">
+            <state line="41" column="24" selection-start="630" selection-end="630" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="e#177#308#0" expanded="false" />
               </folding>
@@ -119,8 +120,8 @@
         <option value="$PROJECT_DIR$/js/framework.js" />
         <option value="$PROJECT_DIR$/js/plugins.js" />
         <option value="$PROJECT_DIR$/css/main.css" />
-        <option value="$PROJECT_DIR$/sass/main.scss" />
         <option value="$PROJECT_DIR$/index.html" />
+        <option value="$PROJECT_DIR$/sass/main.scss" />
         <option value="$PROJECT_DIR$/js/main.js" />
       </list>
     </option>
@@ -396,12 +397,13 @@
             <element signature="e#4088#4286#0" expanded="false" />
             <element signature="e#4495#4705#0" expanded="false" />
             <element signature="e#4798#6240#0" expanded="false" />
+            <element signature="e#6281#8035#0" expanded="false" />
             <element signature="e#8074#8462#0" expanded="false" />
-            <element signature="e#8491#10735#0" expanded="false" />
             <element signature="e#10776#10864#0" expanded="false" />
             <element signature="e#10903#12239#0" expanded="false" />
             <element signature="e#12273#13909#0" expanded="false" />
             <element signature="e#13947#14112#0" expanded="false" />
+            <element signature="e#14142#15205#0" expanded="false" />
             <element signature="e#15235#16287#0" expanded="false" />
             <element signature="e#16319#16880#0" expanded="false" />
             <element signature="e#16931#17623#0" expanded="false" />
@@ -444,15 +446,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sass/main.scss">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="135" column="25" selection-start="2233" selection-end="2233" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#177#308#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.htaccess">
       <provider selected="true" editor-type-id="text-editor">
         <state line="18" column="27" selection-start="660" selection-end="660" vertical-scroll-proportion="0.0">
@@ -466,14 +459,23 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="0" selection-start="406" selection-end="406" vertical-scroll-proportion="-8.75">
+        <state line="8" column="24" selection-start="324" selection-end="324" vertical-scroll-proportion="-5.0">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sass/main.scss">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="41" column="24" selection-start="630" selection-end="630" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#177#308#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="461" column="23" selection-start="14588" selection-end="14588" vertical-scroll-proportion="0.445215">
+        <state line="310" column="38" selection-start="10036" selection-end="10036" vertical-scroll-proportion="0.85714287">
           <folding>
             <element signature="e#413#780#0" expanded="false" />
             <element signature="e#950#1644#0" expanded="false" />
@@ -483,12 +485,13 @@
             <element signature="e#4088#4286#0" expanded="false" />
             <element signature="e#4495#4705#0" expanded="false" />
             <element signature="e#4798#6240#0" expanded="false" />
+            <element signature="e#6281#8035#0" expanded="false" />
             <element signature="e#8074#8462#0" expanded="false" />
-            <element signature="e#8491#10735#0" expanded="false" />
             <element signature="e#10776#10864#0" expanded="false" />
             <element signature="e#10903#12239#0" expanded="false" />
             <element signature="e#12273#13909#0" expanded="false" />
             <element signature="e#13947#14112#0" expanded="false" />
+            <element signature="e#14142#15205#0" expanded="false" />
             <element signature="e#15235#16287#0" expanded="false" />
             <element signature="e#16319#16880#0" expanded="false" />
             <element signature="e#16931#17623#0" expanded="false" />
