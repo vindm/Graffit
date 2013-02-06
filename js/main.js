@@ -1,6 +1,5 @@
 "use strict"
 
-
 function Canvas( elem, options ) {
     var me = this;
 
@@ -13,18 +12,22 @@ function Canvas( elem, options ) {
         x: [], y:[]
     };
 
-    me.addCanvas();
+    me.addTopBar();
+    me.addResizer();
+    me.addCanvases();
     me.addControls();
+    me.resizeCanvases();
     me.build();
-
-    me.onBrushChanged();
 }
 Canvas.prototype = {
 
     defaults: {
-        width: 590,
-        height: 280,
+        width: 594,
+        height: 297,
+        headerHeight: 50,
+        resizerHeight: 16,
         cpHeight: 65,
+        topbarHeight: 16,
         brush: {
             size: 6, minSize: .051, maxSize: 32,
             opacity: .75, minOpacity:.01, maxOpacity: 1,
@@ -34,40 +37,55 @@ Canvas.prototype = {
             space: 16
         }
     },
-    onBrushChanged: function() {
-        var brush = this.brush;
-        [ this.ctx, this.fakeCtx ].forEach(function( ctx, i ) {
-            ctx.strokeStyle = ctx.fillStyle = 'rgba(' + brush.color + ', ' + brush.opacity + ')';
-            ctx.lineWidth = brush.size * 2;
-            ctx.save();
-        });
-    },
 
-    addCanvas: function() {
+    koef: 1,
+    hstorage: [],
+    checkPoint: "",
+    backBlocked: false,
+    backQueue: 0,
+
+    blockResize: false,
+    fsEnabled: false,
+
+    addTopBar: function() {
+        var me = this;
+
+        me.cleanBtn  = $('<a/>', { class: 'cleanBtn',  title: 'Очистить', text: 'Очистить' });
+        me.cancelBtn = $('<a/>', { class: 'cancelBtn', title: 'Отменить', text: 'Отменить' });
+        me.saveBtn   = $('<a/>', { class: 'saveBtn', title: 'Сохранить', text: 'Сохранить' });
+        me.fullBtn   = $('<a/>', { class: 'fullBtn', title: 'Увеличить', text: 'Увеличить' });
+
+        me.cleanBtn.on('mousedown', $.proxy( me.clean, me ));
+        me.cancelBtn.on('mousedown', $.proxy( me.backHistory, me ));
+        me.fullBtn.on('mousedown', $.proxy( me.fullScreen, me ));
+        me.saveBtn.on('mousedown', $.proxy( me.save, me ));
+
+    },
+    addCanvases: function() {
         var me = this,
-            $elem = me.$elem,
-            opts = me.options,
+            opts = me.options;
 
-            $canvas = createCanvas( opts.width, opts.height ),
-            ctx = $canvas[0].getContext('2d'),
-            $fake = $canvas.clone(),
-            fakeCtx = $fake[0].getContext('2d');
+        me.$canvas = createCanvas( opts.width, opts.height );
+        me.ctx = me.$canvas[0].getContext('2d');
 
-        ctx.lineCap = ctx.lineJoin =
-            fakeCtx.lineCap = fakeCtx.lineJoin = "round";
+        me.$fake = me.$canvas.clone();
+        me.fakeCtx = me.$fake[0].getContext('2d');
 
-        me.$canvas = $canvas;
-        me.ctx = ctx;
+        me.$hist = me.$canvas.clone();
+        me.histCtx = me.$hist[0].getContext('2d');
 
-        me.$fake = $fake;
-        me.fakeCtx = fakeCtx;
 
-        $fake.on('mousedown click', $.proxy( me.handleDraw, me ));
-        $(window).on('mousemove mouseup', $.proxy( me.handleDraw, me ));
+        me.$fake.on('mousedown click', $.proxy( me.handleDrawEvents, me ));
+        $(window).on('mousemove mouseup', $.proxy( me.handleDrawEvents, me ));
 
     },
+    addResizer: function() {
+        var me = this;
+        me.$resizer = $('<div/>', { 'class': 'resizer' });
+        me.$resizer.on( 'mousedown', $.proxy( me.handleResizeEvents, me ) );
+        $(window).on('mousemove mouseup', $.proxy(me.handleResizeEvents, me))
 
-
+    },
     addControls: function( ) {
         var me = this,
             opts = this.options,
@@ -106,7 +124,6 @@ Canvas.prototype = {
             onChange: function( color ) {
                 me.brush.color = color;
                 drawSample();
-                me.onBrushChanged();
             }
         });
         ctrlPosition.x += colorPicker.position.w + space*3;
@@ -119,7 +136,6 @@ Canvas.prototype = {
             onChange: function( percent ) {
                 me.brush.size = ( brush.maxSize - brush.minSize ) / 100 * percent + brush.minSize;
                 drawSample();
-                me.onBrushChanged();
             }
         });
         ctrlPosition.x += sizeScroll.position.w + space;
@@ -129,48 +145,197 @@ Canvas.prototype = {
             onChange: function( percent ) {
                 me.brush.opacity = ( brush.maxOpacity - brush.minOpacity ) / 100 * percent + brush.minOpacity;
                 drawSample();
-                me.onBrushChanged();
             }
         });
         ctrlPosition.x += opacityScroll.position.w + space;
 
     },
     build: function() {
-        var me = this, opts = me.options,
-            $elem = me.$elem,
-            $canvas = me.$canvas,
-            $fake = me.$fake,
-            $cp = me.$cp,
-            $palette = me.$paletteCanvas;
+        var me = this, opts = me.options;
 
-        var w = opts.width, h = opts.height + opts.cpHeight;
-        $elem.css({
-            width: w, height: h,
-            marginLeft: -w/2, marginTop: -h/2
-        });
+        me.$elem.append(
 
-        $elem.append(
-            $('<div/>', { 'class': 'wrap', 'width': w, 'height': opts.height }).append(
-                $canvas.addClass('main'),
-                $fake.addClass('fake')
+            $('<header/>').append(
+                $('<h3/>', { class: 'title', text: 'Ваше граффити на  стену Mr Jesus' })
             ),
-            $('<div/>', { 'class': 'toolbar', 'width': w, 'height': opts.cpHeight }).append(
-                $cp.addClass('cp'),
+
+            $('<div/>', { class: 'topbar' }).append(
+                $('<div/>', { class: 'fl_l'} ).append(
+                    me.cleanBtn, '<span> | </span>', me.cancelBtn
+                ),
+                $('<div/>', { class: 'fl_r'} ).append(
+                    me.saveBtn, '<span> | </span>', me.fullBtn
+                )
+            ),
+
+            $('<div/>', { 'class': 'canvas_wrap' }).append(
+                $('<div/>', { 'class': 'canvas_aligner', 'width': opts.width, 'height': opts.height }).append(
+                    me.$canvas.addClass('main'),
+                    me.$fake.addClass('fake'),
+                    me.$hist.addClass('hist')
+                ),
+                me.$resizer
+            ),
+
+
+            $('<div/>', { 'class': 'toolbar', 'width': opts.width, 'height': opts.cpHeight }).append(
+                me.$cp.addClass('cp'),
                 $('<div/>', { 'class': 'palette_wrap' }).append(
-                    $palette.addClass('palette')
+                    me.$paletteCanvas.addClass('palette')
                 )
             )
         );
 
-        var offset = $canvas.offset();
+        var offset = me.$canvas.offset();
         me.position = {
             'x': offset.left,  'y': offset.top,
-            'w': $canvas.width(),'h': $canvas.height()
+            'w': me.$canvas.width(),'h': me.$canvas.height()
         };
     },
 
-    handleDraw: function( e ) {
-        var path = getMouseXY( this.$canvas, e );
+    handleResizeEvents: function( e ) {
+        var opts = this.options;
+        switch( e.type ) {
+            case "mousedown":
+                $('body').css('cursor', "s-resize");
+                this.resizing = true;
+                this.lastCordY = e.pageY;
+                this.ctx.clearRect( 0, 0, opts.width, opts.height );
+                break;
+
+            case "mousemove":
+                if( !this.resizing ) return;
+
+                var opts = this.options,
+                    wrap = this.$canvas.parent(),
+                    height = parseInt( wrap.height() ),
+                    cordY = e.pageY;
+
+                var newHeight = height + cordY - this.lastCordY;
+                if ( newHeight > 600 ) newHeight = 600;
+                if ( newHeight < 297 ) newHeight = 297;
+                this.resH = newHeight;
+
+                var newWidth = newHeight / opts.height * opts.width;
+                this.resW = newWidth;
+
+                wrap.width(newWidth).height(newHeight)
+                this.$elem
+                    .height( opts.headerHeight + opts.topbarHeight + newHeight + opts.resizerHeight + opts.cpHeight + 40 )
+                    .width( newWidth + 32 );
+
+                this.onResize && this.onResize(newWidth, newHeight);
+
+                this.lastCordY = cordY;
+                break;
+
+            case "mouseup":
+                if( !this.resizing ) return;
+                $('body').css('cursor', "default");
+                this.resizing = false;
+                this.lastCordY = 0;
+                this.koef = this.resH / 297;
+                this.options.width = this.resW;
+                this.options.height = this.resH;
+                this.resizeCanvases();
+                this.copyImage( this.ctx );
+                break;
+        }
+
+    },
+    resizeCanvases: function( only ) {
+        var opts = this.options;
+        if ( !only ) {
+            this.$elem
+                .height( opts.headerHeight + opts.topbarHeight + opts.height + opts.resizerHeight + opts.cpHeight + 40 )
+                .width( opts.width + 32 );
+        }
+        this.$canvas.parent().find('canvas')
+            .attr('width', opts.width )
+            .attr('height', opts.height );
+    },
+    fullScreen: function() {
+        var me = this,
+            opts = me.options,
+            time = 400;
+        if ( me.mouse.down || me.blockResize ) return;
+
+        if ( !me.fsEnabled ) {
+            me.fsEnabled = true;
+            me.blockResize = true;
+
+            var width = (window.innerWidth - 40),
+                height = Math.min( (297 / 594) * width, window.innerHeight - 133);
+
+            width = height * ( 594 / 297 );
+
+            me.options.width = width;
+            me.options.height= height;
+            me.koef = height / 297;
+
+            me.$canvas.hide();
+            this.$elem.animate({
+                width: window.innerWidth-2,
+                height: '100%'
+            }, time, function() {
+                $(this).addClass('full');
+                me.fullBtn.text('Уменьшить').attr('title', 'Уменьшить');
+
+                me.resizeCanvases( true );
+                me.copyImage( me.ctx );
+                me.blockResize = false;
+                me.$canvas.fadeIn(300);
+            });
+
+            me.$elem.find('header').slideUp(time);
+            me.$resizer.slideUp(time);
+
+            me.$canvas.parent().animate({
+                width: width,
+                height: height
+            }, time);
+
+        } else {
+            me.fsEnabled = false;
+            me.blockResize = true;
+
+            me.options.width = me.resW || 594;
+            me.options.height = me.resH || 297;
+            me.koef = me.options.height / 297;
+
+            me.$canvas.hide();
+            me.$elem.animate({
+                width: opts.width + 32,
+                height: opts.headerHeight + opts.topbarHeight + opts.height + opts.resizerHeight + opts.cpHeight + 40
+            }, time, function() {
+                $(this).removeClass('full');
+                me.fullBtn.text('Увеличить').attr('title', 'Увеличить');
+
+                me.resizeCanvases( true );
+                me.copyImage( me.ctx );
+                me.blockResize = false;
+                me.$canvas.fadeIn(300);
+            });
+
+            me.$elem.find('header').slideDown(time);
+            me.$resizer.slideDown(time);
+
+            me.$canvas.parent().animate({
+                width: opts.width,
+                height: opts.height
+            }, time);
+
+        }
+    },
+    copyImage: function(ctx, callback) {
+        var me = this;
+        me.drawHistory();
+        callback && callback();
+    },
+
+    handleDrawEvents: function( e ) {
+        var path = getMouseXY( this.$canvas, e),
+            opts = this.options;
 
         switch ( e.type ) {
 
@@ -183,9 +348,9 @@ Canvas.prototype = {
 
             case 'mousemove':
                 if ( !this.down ) return;
-                if( this.mouse.x == path.x && this.mouse.y == path.y) return;
+                if ( this.mouse.x == path.x && this.mouse.y == path.y ) return;
 
-                this.fakeCtx.clearRect( 0, 0, this.options.width, this.options.height );
+                this.fakeCtx.clearRect( 0, 0, opts.width, opts.height );
                 this.mouse.x.push( path.x );
                 this.mouse.y.push( path.y );
                 this.draw( this.fakeCtx );
@@ -194,18 +359,45 @@ Canvas.prototype = {
             case 'mouseup':
                 if ( !this.down ) return;
                 this.down = false;
-                this.fakeCtx.clearRect( 0, 0, this.options.width, this.options.height );
+
+                this.fakeCtx.clearRect( 0, 0, opts.width, opts.height );
                 this.draw( this.ctx );
+                this.pushHistory({
+                    mouse : { x: this.mouse.x, y: this.mouse.y },
+                    color: this.brush.color,
+                    size: this.brush.size * this.koef,
+                    opacity: this.brush.opacity,
+                    koef: this.koef
+                });
+                this.mouse.x = [];
+                this.mouse.y = [];
 
             break;
         }
 
     },
-    draw: function( ctx ) {
+    draw: function( ctx, hist ) {
         var me = this,
-            path = me.mouse,
-            x = path.x, y = path.y,
+            mouse, color, size, opacity;
+
+        if( hist ) {
+            mouse = hist.mouse;
+            color = hist.color;
+            opacity = hist.opacity;
+            size = hist.size;
+        } else {
+            mouse = me.mouse;
+            color = me.brush.color;
+            size = me.brush.size * me.koef;
+            opacity = me.brush.opacity;
+        }
+        var x = mouse.x, y = mouse.y,
             lenX = x.length;
+
+        ctx.strokeStyle = "rgba("+color+", "+opacity+")";
+        ctx.lineWidth = size*2;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
 
         ctx.beginPath();
         ctx.moveTo( x[0], y[0] );
@@ -239,6 +431,137 @@ Canvas.prototype = {
         ctx.moveTo( x[lenX-1], y[lenX-1] );
         ctx.stroke();
         ctx.closePath();
+    },
+
+    pushHistory: function( state ) {
+        var me = this;
+        me.hstorage.push( state );
+
+        me.histCtx.clearRect(0, 0, me.options.width, me.options.height);
+        me.drawHistory();
+    },
+    backHistory: function() {
+        var me = this,
+            opts = me.options,
+            storage = me.hstorage,
+            len = storage.length;
+
+        if ( len === 0 ) {
+            me.backQueue = 0;
+            if ( me.checkPoint == "" ) return false;
+            else {
+                me.hstorage = [];
+                me.checkPoint = "";
+            }
+        } else {
+            if( me.backBlocked ) {
+                me.backQueue++;
+                return;
+            }
+            me.backBlocked = true;
+
+            if( me.checkPoint != '' ) {
+                $('<img/>', { src: thmeis.checkPoint }).on('load', function() {
+                    me.$hist.fadeIn(200, function() {
+                        me.ctx.clearRect( 0, 0, opts.width, opts.height );
+                        me.ctx.drawImage( this, 0, 0, opts.width, opts.height );
+                        me.redrawHistory();
+                    });
+                });
+            } else {
+                me.ctx.clearRect(0, 0, opts.width, opts.height );
+                me.redrawHistory();
+            }
+        }
+    },
+    drawHistory: function() {
+        var me = this,
+            storage = me.hstorage,
+            len = storage.length,
+            _x = [], _y = [],
+            _s, koef;
+
+        for ( var i = 0; i < len - 1; i++ ) {
+            var state = storage[i];
+            if ( !state ) return;
+
+            koef = state.koef;
+            _s = state.size / koef * me.koef;
+
+            for( var j = 0; j < state.mouse.x.length; j++ ) {
+                _x.push( state.mouse.x[j] / koef * me.koef );
+                _y.push( state.mouse.y[j] / koef * me.koef );
+            }
+
+            me.draw( me.histCtx, { mouse : {x:_x, y: _y}, size: _s, color: state.color, opacity: state.opacity });
+            _x = []; _y = [];
+        }
+
+        me.checkPoint = me.$hist[0].toDataURL();
+
+        $('<img/>', { src: me.checkPoint }).on('load', function() {
+            me.ctx.clearRect( 0, 0, me.options.width, me.options.height );
+            me.ctx.drawImage( this, 0, 0, me.options.width, me.options.height );
+            me.propDraw( me.ctx, me.hstorage, len - 1, len );
+        });
+    },
+    redrawHistory: function() {
+        var me = this;
+
+        me.$hist.fadeOut(0, function() {
+            me.histCtx.clearRect(0, 0, me.options.width, me.options.height );
+            me.propDraw( me.histCtx, me.hstorage, 0, me.hstorage.length - 2);
+
+            me.checkPoint = me.$hist[0].toDataURL();
+            me.backBlocked = false;
+            if( me.backQueue > 0 ) {
+                for( var i = 0; i < me.backQueue; i++) {
+                    me.backHistory();
+                    me.backQueue--;
+                }
+            }
+            me.hstorage.pop();
+        });
+    },
+    propDraw: function( ctx, storage, from, to ) {
+        var _x = [], _y = [],
+            _s, state, koef;
+
+        for ( var i = from; i < to; i++ ) {
+            state = storage[i];
+            if ( !state ) return;
+
+            koef = state.koef;
+            _s = state.size / koef * this.koef;
+
+            for( var j = 0; j < state.mouse.x.length; j++ ) {
+                _x.push( state.mouse.x[j] / koef * this.koef );
+                _y.push( state.mouse.y[j] / koef * this.koef );
+            }
+
+            this.draw( ctx, {
+                mouse : { x:_x, y: _y },
+                size: _s,
+                color: state.color,
+                opacity: state.opacity
+            });
+
+            _x = []; _y = [];
+        }
+    },
+
+    clean: function() {
+        var opts = this.options;
+        this.hstorage = [];
+        this.checkPoint = "";
+        $.each([ this.ctx, this.fakeCtx ], function(i, ctx) {
+            ctx.clearRect(0,0, opts.width, opts.height)
+        });
+    },
+    save: function() {
+        window.open(this.$canvas[0].toDataURL(),'',
+            'width='+this.options.width+
+            ',height='+this.options.height);
     }
 };
 
@@ -280,8 +603,6 @@ var CanvasModule = function( module, $canvas, ctx, pos ) {
 
     return me;
 };
-
-
 
 var ColorPicker = function( $canvas, ctx, pos, options ) {
     var me = new CanvasModule( this, $canvas, ctx, pos ),
@@ -576,7 +897,6 @@ Scroll.prototype = {
 };
 
 
-
 function createCanvas( width, height ) {
     return $('<canvas width=' + width + ' height=' + height + '/>');
 }
@@ -645,6 +965,7 @@ function touchHandler( event ) {
     first.target.dispatchEvent( simulatedEvent );
     event.preventDefault();
 }
+
 
 $(function () {
     new Canvas( $(".graffit")[0] );
